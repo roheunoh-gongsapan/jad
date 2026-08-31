@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장안동기술사 | 건설 종합 플랫폼</title>
+    
+    <meta name="description" content="전 인류의 지속 가능한 미래를 위한 건설 혁신 선도. 엔지니어링, 대표소개, 스마트 특허기술, 보물창(자료실), 방명록(질의응답), 건축시공기술사 정보 제공.">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Pretendard', 'sans-serif'] },
+                    colors: {
+                        primary: '#1E3A8A', 
+                        primaryDark: '#172554',
+                        secondary: '#16A34A', 
+                        dark: '#0f172a',
+                        light: '#f8fafc',
+                        accent: '#eab308',
+                        gold: '#d97706'
+                    },
+                    boxShadow: {
+                        'panel': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'panel-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; background-color: #f1f5f9; }
+        
+        /* Dashboard Panel Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        /* Interactive Panel Cards */
+        .panel-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #93c5fd;
+        }
+        .panel-icon-bg {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            font-size: 8rem;
+            opacity: 0.03;
+            transform: rotate(-15deg);
+            transition: transform 0.3s ease;
+        }
+        .panel-card:hover .panel-icon-bg {
+            transform: rotate(0deg) scale(1.1);
+            opacity: 0.06;
+        }
+
+        /* Section Visibility & Transitions */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Nav links */
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: ''; position: absolute; width: 0; height: 2px;
+            bottom: -4px; left: 0; background-color: #1E3A8A;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px 20px;
+            position: fixed;
+            z-index: 100;
+            bottom: 30px;
+            right: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 40px;
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="flex items-center gap-3 text-sm font-medium">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-green-400 text-lg"></i>
+        <span id="toast-message">메시지가 전송되었습니다.</span>
+    </div>
+
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+        <div class="container mx-auto px-4 md:px-8 py-3 flex justify-between items-center">
+            <!-- Brand Logo -->
+            <button onclick="showSection('dashboard')" class="text-2xl font-bold tracking-tighter flex items-center gap-2.5 hover:opacity-85 transition-opacity text-left">
+                <div class="bg-primary text-white p-2 rounded-lg shadow-sm">
+                    <i class="fa-solid fa-building-shield text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-dark font-black tracking-tight">장안동<span class="text-primary">기술사</span></span>
+                    <span class="text-xs font-semibold text-gray-500 border border-gray-300 rounded px-1.5 py-0.5 ml-2 hidden sm:inline-block">건설 종합 플랫폼</span>
+                </div>
+            </button>
+            
+            <!-- Desktop Quick Navigation -->
+            <nav class="hidden lg:flex space-x-6 font-medium text-sm text-gray-600 items-center">
+                <button onclick="showSection('dashboard')" class="nav-link hover:text-primary transition-colors">홈/대시보드</button>
+                <button onclick="showSection('profile')" class="nav-link hover:text-primary transition-colors">대표소개</button>
+                <button onclick="showSection('about')" class="nav-link hover:text-primary transition-colors">회사소개</button>
+                <button onclick="showSection('business')" class="nav-link hover:text-primary transition-colors">사업분야</button>
+                <button onclick="showSection('treasure')" class="nav-link hover:text-primary transition-colors"><i class="fa-solid fa-vault text-amber-500 mr-1"></i>보물창(자료실)</button>
+                <button onclick="showSection('guestbook')" class="nav-link hover:text-primary transition-colors"><i class="fa-solid fa-comments text-blue-500 mr-1"></i>방명록/Q&A</button>
+                <button onclick="openContactModal()" class="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-full hover:bg-primary hover:text-white transition-colors border border-primary/20">문의하기</button>
+            </nav>
+
+            <!-- Mobile Menu Trigger -->
+            <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 text-2xl p-2 focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-gray-200 px-6 py-4 space-y-3">
+            <button onclick="showSection('dashboard'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">홈/대시보드</button>
+            <button onclick="showSection('profile'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">대표소개 (약력)</button>
+            <button onclick="showSection('about'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">회사소개</button>
+            <button onclick="showSection('business'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">사업분야</button>
+            <button onclick="showSection('patent'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">스마트 특허기술</button>
+            <button onclick="showSection('platform'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">공사판마켓</button>
+            <button onclick="showSection('treasure'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-amber-700 hover:text-primary"><i class="fa-solid fa-vault mr-2"></i>보물창 (자료실)</button>
+            <button onclick="showSection('guestbook'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-blue-700 hover:text-primary"><i class="fa-solid fa-comments mr-2"></i>방명록 / 질의응답</button>
+            <button onclick="showSection('community'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">건축시공기술사 라운지</button>
+            <button onclick="showSection('field'); toggleMobileMenu()" class="block w-full text-left py-2 font-medium text-gray-700 hover:text-primary">현장활동 갤러리</button>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 md:px-8 py-8 relative">
+        
+        <!-- ========================================== -->
+        <!-- SECTION 1: DASHBOARD (Main View) -->
+        <!-- ========================================== -->
+        <section id="dashboard" class="content-section active">
+            
+            <!-- Hero Welcome Banner -->
+            <div class="bg-gradient-to-r from-primary via-blue-800 to-indigo-900 rounded-2xl p-8 md:p-10 text-white mb-10 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-2xl"></div>
+                <div class="relative z-10 max-w-3xl">
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-blue-200 mb-4 border border-white/20">
+                        <i class="fa-solid fa-award text-amber-400"></i> 건축시공기술사 직접 운영 엔지니어링 플랫폼
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">건설의 새로운 패러다임,<br>장안동기술사 플랫폼입니다.</h1>
+                    <p class="text-blue-100 text-base md:text-lg mb-6 leading-relaxed">
+                        최고 수준의 건축엔지니어링부터 스마트 특허기술(SCBP), 자재 순환 마켓, 전문 자료실(보물창), 실시간 소통 방명록까지 원스톱으로 지원합니다.
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-xs md:text-sm font-medium">
+                        <span onclick="showSection('profile')" class="cursor-pointer bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors"><i class="fa-solid fa-user-check mr-1.5 text-emerald-300"></i>대표 노은오 기술사</span>
+                        <span onclick="showSection('treasure')" class="cursor-pointer bg-amber-500/30 hover:bg-amber-500/50 text-amber-200 border border-amber-400/30 px-3 py-1.5 rounded-full transition-colors"><i class="fa-solid fa-vault mr-1.5"></i>보물창 자료실</span>
+                        <span onclick="showSection('guestbook')" class="cursor-pointer bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 border border-blue-400/30 px-3 py-1.5 rounded-full transition-colors"><i class="fa-solid fa-comments mr-1.5"></i>질의응답/방명록</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid Panels -->
+            <div class="dashboard-grid">
+                
+                <!-- Panel 1: 대표소개 (NEW) -->
+                <div class="panel-card group border-amber-200 bg-amber-50/20" onclick="showSection('profile')">
+                    <i class="fa-solid fa-user-tie text-amber-100 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl mb-4 group-hover:bg-amber-600 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-id-badge"></i>
+                    </div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="text-xl font-bold text-dark">대표소개</h3>
+                        <span class="text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">약력/경력</span>
+                    </div>
+                    <p class="text-gray-600 text-sm flex-grow mt-1">노은오 건축시공기술사의 국가기술자격, 기술등급 20여년 현장 엔지니어링 약력.</p>
+                    <div class="mt-4 text-amber-700 font-bold text-sm flex items-center">
+                        경력/약력 보기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 2: 보물창 (자료실) (NEW) -->
+                <div class="panel-card group border-indigo-200 bg-indigo-50/20" onclick="showSection('treasure')">
+                    <i class="fa-solid fa-box-archive text-indigo-100 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-vault"></i>
+                    </div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="text-xl font-bold text-dark">보물창 <span class="text-sm font-normal text-gray-500">(자료실)</span></h3>
+                    </div>
+                    <p class="text-gray-600 text-sm flex-grow mt-1">시공 지침서, 기술사 서브노트 요약, 안전관리계획서 양식 등 엄선된 기술 자료 모음.</p>
+                    <div class="mt-4 text-indigo-700 font-bold text-sm flex items-center">
+                        자료실 열기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 3: 방명록/질의응답 (NEW) -->
+                <div class="panel-card group border-emerald-200 bg-emerald-50/20" onclick="showSection('guestbook')">
+                    <i class="fa-solid fa-comments text-emerald-100 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="text-xl font-bold text-dark">방명록 / Q&A</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm flex-grow mt-1">건설 기술 문의, 특허 협력 제안, 수험 상담 및 실시간 방명록 소통 공간.</p>
+                    <div class="mt-4 text-emerald-700 font-bold text-sm flex items-center">
+                        질의응답 작성/보기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 4: 회사소개 -->
+                <div class="panel-card group" onclick="showSection('about')">
+                    <i class="fa-solid fa-building text-gray-200 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center text-xl mb-4 group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-regular fa-building"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-1">회사소개</h3>
+                    <p class="text-gray-500 text-sm flex-grow">장안동기술사의 설립 목적, 비전, 사업자 정보 및 엔지니어링 미션.</p>
+                    <div class="mt-4 text-primary font-bold text-sm flex items-center">
+                        자세히 보기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 5: 사업분야 -->
+                <div class="panel-card group" onclick="showSection('business')">
+                    <i class="fa-solid fa-briefcase text-gray-200 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-green-50 text-secondary flex items-center justify-center text-xl mb-4 group-hover:bg-secondary group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-1">사업분야</h3>
+                    <p class="text-gray-500 text-sm flex-grow">엔지니어링 기술검토, 자원순환, 스마트 OSC 탈현장화 사업 영역.</p>
+                    <div class="mt-4 text-secondary font-bold text-sm flex items-center">
+                        자세히 보기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 6: 스마트 특허기술 -->
+                <div class="panel-card group border-blue-200 bg-blue-50/30" onclick="showSection('patent')">
+                    <i class="fa-solid fa-microchip text-blue-100 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-cube"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-1">스마트 특허기술 <span class="text-xs bg-blue-200 text-blue-800 font-bold px-2 py-0.5 rounded-full ml-1">SCBP</span></h3>
+                    <p class="text-gray-500 text-sm flex-grow">스마트 내진 치장벽돌(SCBP) 개발, 원가 53% 절감 특허 솔루션.</p>
+                    <div class="mt-4 text-blue-600 font-bold text-sm flex items-center">
+                        기술 사양 보기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 7: 공사판마켓 -->
+                <div class="panel-card group" onclick="showSection('platform')">
+                    <i class="fa-solid fa-store text-gray-200 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-1">공사판마켓</h3>
+                    <p class="text-gray-500 text-sm flex-grow">순환골재, 잉여자재, 중고장비 및 가설재 건설 자원 거래 마켓.</p>
+                    <div class="mt-4 text-purple-600 font-bold text-sm flex items-center">
+                        마켓 입장하기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 8: 건축시공기술사 -->
+                <div class="panel-card group" onclick="showSection('community')">
+                    <i class="fa-solid fa-graduation-cap text-gray-200 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center text-xl mb-4 group-hover:bg-yellow-500 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-1">건축시공기술사</h3>
+                    <p class="text-gray-500 text-sm flex-grow">스터디 그룹, 시험 노하우, 기출문제 분석 및 커뮤니티 라운지.</p>
+                    <div class="mt-4 text-yellow-600 font-bold text-sm flex items-center">
+                        라운지 가기 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+                <!-- Panel 9: 현장활동 -->
+                <div class="panel-card group" onclick="showSection('field')">
+                    <i class="fa-solid fa-helmet-safety text-gray-200 panel-icon-bg"></i>
+                    <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-sm">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-1">현장활동</h3>
+                    <p class="text-gray-500 text-sm flex-grow">안전점검, 감리, 정밀안전진단 등 현장 활동 사진 기록 갤러리.</p>
+                    <div class="mt-4 text-orange-600 font-bold text-sm flex items-center">
+                        갤러리 확인 <i class="fa-solid fa-arrow-right ml-2 text-xs transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 2: REPRESENTATIVE PROFILE (대표소개) -->
+        <!-- ========================================== -->
+        <section id="profile" class="content-section">
+            <div class="mb-6 flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-dark flex items-center gap-2">
+                            <i class="fa-solid fa-user-tie text-amber-600"></i> 대표소개 <span class="text-sm font-normal text-gray-500">(경력 및 약력)</span>
+                        </h2>
+                    </div>
+                </div>
+                <div class="hidden sm:block">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-300">
+                        <i class="fa-solid fa-certificate mr-1"></i>건축시공기술사 직접검토
+                    </span>
+                </div>
+            </div>
+
+            <!-- Profile Overview Card -->
+            <div class="bg-white rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm mb-8">
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    
+                    <!-- Avatar / Key Titles Sidebar -->
+                    <div class="w-full md:w-1/3 flex flex-col items-center text-center bg-slate-50 p-6 rounded-2xl border border-gray-200">
+                        <div class="w-32 h-32 bg-gradient-to-tr from-primary to-blue-600 rounded-full flex items-center justify-center text-white text-5xl font-black mb-4 shadow-md border-4 border-white">
+                            <i class="fa-solid fa-user-gear"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-dark mb-1">노 은 오</h3>
+                        <p class="text-primary font-bold text-sm mb-3">장안동기술사 대표</p>
+                        
+                        <div class="w-full space-y-2 text-left bg-white p-4 rounded-xl border border-gray-200 text-xs text-gray-700 mb-4">
+                            <div class="flex justify-between items-center border-b pb-1">
+                                <span class="font-semibold text-gray-500">핵심자격</span>
+                                <span class="font-bold text-primary">건축시공기술사</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b pb-1">
+                                <span class="font-semibold text-gray-500">건축분야</span>
+                                <span class="font-bold text-emerald-700">건축 특급기술인</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b pb-1">
+                                <span class="font-semibold text-gray-500">사업관리</span>
+                                <span class="font-bold text-indigo-700">건설사업관리 특급</span>
+                            </div>
+                           
+                            </div>
+                        </div>
+
+                        <button onclick="openContactModal()" class="w-full py-2.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primaryDark transition-colors shadow">
+                            <i class="fa-solid fa-paper-plane mr-1"></i> 대표 기술사 직접 문의
+                        </button>
+                    </div>
+
+                    <!-- Detailed Career & Licenses Content -->
+                    <div class="w-full md:w-2/3 space-y-6">
+                        
+                        <!-- Greeting & Core Motto -->
+                        <div class="bg-blue-50/60 p-5 rounded-xl border border-blue-100">
+                            <h4 class="text-base font-bold text-primary mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-quote-left"></i> 엔지니어링 신뢰와 기술 혁신을 바탕으로 최선의 솔루션을 제공합니다.
+                            </h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                20여 년간 시공, 감리, 건설사업관리, 설계검토, 법원감정 현장에서 쌓아온 기술 노하우를 바탕으로, 건설 현장의 안전성과 경제성을 극대화하는 종합 기술 서비스를 제공하고 있습니다.
+                            </p>
+                        </div>
+
+                        <!-- Qualifications / Certifications -->
+                        <div>
+                            <h4 class="text-base font-bold text-dark mb-3 flex items-center gap-2 border-b pb-2">
+                                <i class="fa-solid fa-award text-amber-500"></i> 국가기술자격 및 기술등급
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="bg-white p-3.5 rounded-xl border border-gray-200 flex items-start gap-3 shadow-2xs">
+                                    <div class="p-2 bg-amber-100 text-amber-800 rounded-lg text-lg"><i class="fa-solid fa-medal"></i></div>
+                                    <div>
+                                        <div class="font-bold text-sm text-dark">건축시공기술사</div>
+                                        <div class="text-xs text-gray-500">국가기술자격 (한국산업인력공단)</div>
+                                        <div class="text-[11px] text-amber-700 font-medium">                                    </div>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-gray-200 flex items-start gap-3 shadow-2xs">
+                                    <div class="p-2 bg-blue-100 text-blue-800 rounded-lg text-lg"><i class="fa-solid fa-shield-halved"></i></div>
+                                    <div>
+                                        <div class="font-bold text-sm text-dark">건설안전기사 / 건축기사</div>
+                                        <div class="text-xs text-gray-500">국가기술자격 취득</div>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-gray-200 flex items-start gap-3 shadow-2xs">
+                                    <div class="p-2 bg-emerald-100 text-emerald-800 rounded-lg text-lg"><i class="fa-solid fa-id-card"></i></div>
+                                    <div>
+                                        <div class="font-bold text-sm text-dark">건축 특급기술인 / 고급 기술자</div>
+                                        <div class="text-xs text-gray-500">한국건설기술인협회 경력인증</div>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-gray-200 flex items-start gap-3 shadow-2xs">
+                                    <div class="p-2 bg-purple-100 text-purple-800 rounded-lg text-lg"><i class="fa-solid fa-diagram-project"></i></div>
+                                    <div>
+                                        <div class="font-bold text-sm text-dark">건설사업관리 특급기술인</div>
+                                        <div class="text-xs text-gray-500">건축구조/시공, 품질, 안전관리 등</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Career Timeline (NO Education as requested) -->
+                        <div>
+                            <h4 class="text-base font-bold text-dark mb-3 flex items-center gap-2 border-b pb-2">
+                                <i class="fa-solid fa-briefcase text-primary"></i> 주요 실무 경력 사항 (Career History)
+                            </h4>
+                            <div class="relative border-l-2 border-gray-200 ml-3 pl-5 space-y-4 text-sm">
+                                <div class="relative">
+                                    <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-primary border-2 border-white"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-dark text-base">(주)포스코에이앤씨건축사사무소</span>
+                                        <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">2025.03 ~ 현재 (재직중)</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600 font-medium">부장 / 공공중부섹션 건설사업관리 및 기술 검토 업무 수행</p>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-gray-400 border-2 border-white"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-dark">(주)신한종합건축사사무소</span>
+                                        <span class="text-xs text-gray-500">2023.08 ~ 2024.09</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">건축 감리 및 건설사업관리 수행</p>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-gray-400 border-2 border-white"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-dark">(주)에이치케이건축사사무소</span>
+                                        <span class="text-xs text-gray-500">2017.09 ~ 2023.08</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">건축 시공 기술지휘 및 감리업무</p>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-gray-400 border-2 border-white"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-dark" (주)혜원까치종합건축사사무소</span>
+                                        <span class="text-xs text-gray-500">2014.04 ~ 2017.09</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">건설사업관리 및 현장 공정·안전 검토</p>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-gray-400 border-2 border-white"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-dark">(주)휴다임건축사사무소</span>
+                                        <span class="text-xs text-gray-500">2008.05 ~ 2014.04</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">건축 감리 및 기술 지원</p>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-gray-400 border-2 border-white"></div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-dark">(주)서한종합건축사사무소 외 초기 기술 경력</span>
+                                        <span class="text-xs text-gray-500">2005.06 ~ 2008.05</span>
+                                    </div>
+                                    <p class="text-xs text-gray-600">건축 설계도면 검토 및 현장 시공 기술 지원</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Awards & Recognition -->
+                        <div>
+                            <h4 class="text-base font-bold text-dark mb-3 flex items-center gap-2 border-b pb-2">
+                                <i class="fa-solid fa-trophy text-amber-500"></i> 주요 포상 및 기타 위촉 (Awards & Appointments)
+                            </h4>
+                            <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-200/60 space-y-2 text-xs">
+                                <div class="flex items-center gap-2 font-bold text-amber-900">
+                                    <i class="fa-solid fa-star text-amber-500"></i>
+                                    <span>양천구청장 표창장 수여 (제 158호, 2022년)</span>
+                                </div>
+                                <div class="flex items-center gap-2 font-medium text-gray-700 pl-5">
+                                    <span>- 건축 및 지역 건설 안전 관리 기여 공로</span>
+                                </div>
+                                <div class="flex items-center gap-2 font-bold text-amber-900 pt-1">
+                                    <i class="fa-solid fa-gavel text-amber-600"></i>
+                                    <span>법원행정처 감정인 등재 (2024년)</span>
+                                </div>
+                                <div class="flex items-center gap-2 font-medium text-gray-700 pl-5">
+                                    <span>- 건설 분쟁 및 하자 정밀 기술 감정 담당</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 3: TREASURE ARCHIVE (보물창 - 자료실) -->
+        <!-- ========================================== -->
+        <section id="treasure" class="content-section">
+            <div class="mb-6 flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-dark flex items-center gap-2">
+                            <i class="fa-solid fa-vault text-amber-500"></i> 보물창 <span class="text-sm font-normal text-gray-500">(기술 & 시험 자료실)</span>
+                        </h2>
+                    </div>
+                </div>
+                <!-- Search bar for Archive -->
+                <div class="relative hidden sm:block">
+                    <input type="text" id="archive-search" onkeyup="filterArchive()" placeholder="자료 제목, 키워드 검색..." class="pl-9 pr-4 py-1.5 rounded-full border border-gray-300 focus:outline-none focus:border-indigo-500 text-xs w-60">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Category Filter Buttons -->
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 custom-scroll">
+                <button onclick="filterArchiveCategory('all')" class="cat-btn active px-4 py-1.5 bg-indigo-600 text-white rounded-full text-xs font-bold whitespace-nowrap shadow-xs">전체 자료</button>
+                <button onclick="filterArchiveCategory('exam')" class="cat-btn px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-xs font-medium whitespace-nowrap">기술사 시험 자료</button>
+                <button onclick="filterArchiveCategory('guide')" class="cat-btn px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-xs font-medium whitespace-nowrap">시공/공법 가이드</button>
+                <button onclick="filterArchiveCategory('form')" class="cat-btn px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-xs font-medium whitespace-nowrap">안전/서식 양식</button>
+                <button onclick="filterArchiveCategory('patent')" class="cat-btn px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-xs font-medium whitespace-nowrap">특허(SCBP) 기술서</button>
+            </div>
+
+            <!-- Resource Items List -->
+            <div id="archive-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                <!-- Archive Item 1 -->
+                <div class="archive-card bg-white p-5 rounded-2xl border border-gray-200 hover:shadow-md transition-all flex flex-col justify-between" data-category="exam" data-title="건축시공기술사 132회 서술형 용어 요약집">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">기술사 시험</span>
+                            <span class="text-xs text-gray-400">PDF · 4.8MB</span>
+                        </div>
+                        <h4 class="font-bold text-dark text-base mb-2 hover:text-indigo-600 cursor-pointer" onclick="openResourceModal('건축시공기술사 132회 핵심용어 요약집', '노은오 대표 기술사가 필기 합격 당시 종합 정리를 거친 핵심 서술형 요약 자료입니다.')">
+                            <i class="fa-regular fa-file-pdf text-red-500 mr-2"></i>건축시공기술사 핵심 서술형 용어 요약집
+                        </h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                            흙막이 가시설, 콘크리트 균열, 초고층 시공계획 핵심 개념을 한눈에 볼 수 있는 핵심 암기 노하우 요약집.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t flex justify-between items-center text-xs">
+                        <span class="text-gray-400"><i class="fa-regular fa-eye mr-1"></i>조회 1,240회</span>
+                        <button onclick="downloadFileSimulator('건축시공기술사_핵심용어요약집.pdf')" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg font-bold transition-colors">
+                            <i class="fa-solid fa-download mr-1"></i>다운로드
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Archive Item 2 -->
+                <div class="archive-card bg-white p-5 rounded-2xl border border-gray-200 hover:shadow-md transition-all flex flex-col justify-between" data-category="patent" data-title="스마트 내진 치장벽돌 SCBP 상세 시공지침서">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[11px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">특허 기술서</span>
+                            <span class="text-xs text-gray-400">PDF · 8.2MB</span>
+                        </div>
+                        <h4 class="font-bold text-dark text-base mb-2 hover:text-indigo-600 cursor-pointer" onclick="openResourceModal('SCBP 상세 시공지침서 및 내진 구조검토서', '스마트 내진 치장벽돌(SCBP) 모듈러 시공 절차 및 내진성능 시험결과 포함.')">
+                            <i class="fa-regular fa-file-pdf text-red-500 mr-2"></i>스마트 내진 치장벽돌(SCBP) 시공지침서
+                        </h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                            기존 적벽돌 대비 인건비 66% 절감, 구조적 내진 성능 향상을 실현한 특허 제품의 상세 표준 시공 도면 및 지침서.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t flex justify-between items-center text-xs">
+                        <span class="text-gray-400"><i class="fa-regular fa-eye mr-1"></i>조회 890회</span>
+                        <button onclick="downloadFileSimulator('SCBP_스마트내진치장벽돌_시공지침서.pdf')" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg font-bold transition-colors">
+                            <i class="fa-solid fa-download mr-1"></i>다운로드
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Archive Item 3 -->
+                <div class="archive-card bg-white p-5 rounded-2xl border border-gray-200 hover:shadow-md transition-all flex flex-col justify-between" data-category="form" data-title="건설공사 안전관리계획서 작성 양식 및 체크리스트">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">안전/양식</span>
+                            <span class="text-xs text-gray-400">HWP / DOCX</span>
+                        </div>
+                        <h4 class="font-bold text-dark text-base mb-2 hover:text-indigo-600 cursor-pointer" onclick="openResourceModal('건설공사 안전관리계획서 표준 양식', '국토안전관리원 심사 기준에 맞춘 실무 안전관리계획서 양식 및 항목별 점검표')">
+                            <i class="fa-regular fa-file-word text-blue-500 mr-2"></i>안전관리계획서 표준 양식 & 체크리스트
+                        </h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                            중소규모 현장에서 즉시 활용 가능한 공종별 안전 점검표 및 안전관리계획서 표준 템플릿 모음.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t flex justify-between items-center text-xs">
+                        <span class="text-gray-400"><i class="fa-regular fa-eye mr-1"></i>조회 2,150회</span>
+                        <button onclick="downloadFileSimulator('건설공사_안전관리계획서_표준양식.zip')" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg font-bold transition-colors">
+                            <i class="fa-solid fa-download mr-1"></i>다운로드
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Archive Item 4 -->
+                <div class="archive-card bg-white p-5 rounded-2xl border border-gray-200 hover:shadow-md transition-all flex flex-col justify-between" data-category="guide" data-title="동절기 콘크리트 양생 및 품질관리 가이드">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[11px] font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded">시공 가이드</span>
+                            <span class="text-xs text-gray-400">PDF · 3.1MB</span>
+                        </div>
+                        <h4 class="font-bold text-dark text-base mb-2 hover:text-indigo-600 cursor-pointer" onclick="openResourceModal('동절기 콘크리트 양생 실무 지침', '한중콘크리트 온도시뮬레이션 및 양생 열풍기 배치안 포함')">
+                            <i class="fa-regular fa-file-pdf text-red-500 mr-2"></i>동절기 한중콘크리트 양생 지침서
+                        </h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                            동해 방지, 보온 양생 관리기준, 초기 강도 확보 기술 노하우를 정리한 실무 기술 지침.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t flex justify-between items-center text-xs">
+                        <span class="text-gray-400"><i class="fa-regular fa-eye mr-1"></i>조회 640회</span>
+                        <button onclick="downloadFileSimulator('동절기_콘크리트_양생지침.pdf')" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg font-bold transition-colors">
+                            <i class="fa-solid fa-download mr-1"></i>다운로드
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 4: GUESTBOOK & Q&A (방명록/질의응답) -->
+        <!-- ========================================== -->
+        <section id="guestbook" class="content-section">
+            <div class="mb-6 flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-dark flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-blue-600"></i> 방명록 / 질의응답 <span class="text-sm font-normal text-gray-500">(Q&A 소통창)</span>
+                        </h2>
+                    </div>
+                </div>
+                <button onclick="toggleGuestbookForm()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen"></i> 글쓰기 / 문의 남기기
+                </button>
+            </div>
+
+            <!-- Write Form Box (Collapsible) -->
+            <div id="guestbook-form-box" class="hidden bg-white rounded-2xl p-6 border border-blue-200 shadow-sm mb-8 transition-all">
+                <h3 class="text-lg font-bold text-dark mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-envelope-open-text text-blue-600"></i> 새로운 질의응답 및 방명록 남기기
+                </h3>
+                <form onsubmit="handleGuestbookSubmit(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">작성자 / 기업명 *</label>
+                            <input type="text" id="gb-author" required placeholder="예: 김건설 / (주)현장" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">카테고리 *</label>
+                            <select id="gb-category" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                                <option value="기술문의">기술문의 (엔지니어링)</option>
+                                <option value="특허협력">특허(SCBP) 자재문의</option>
+                                <option value="시험상담">건축시공기술사 수험상담</option>
+                                <option value="응원/방명록">응원 / 일반 방명록</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">비밀번호 (수정/삭제용)</label>
+                            <input type="password" id="gb-pass" placeholder="4자리 숫자" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">제목 *</label>
+                        <input type="text" id="gb-title" required placeholder="질문 또는 남기실 글의 제목을 입력하세요" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">내용 *</label>
+                        <textarea id="gb-content" rows="4" required placeholder="궁금하신 기술적인 질문이나 방명록 내용을 상세히 적어주세요. 대표 기술사가 직접 확인합니다." class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="toggleGuestbookForm()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-bold transition-colors">취소</button>
+                        <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors shadow">등록하기</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Posts List Table / Cards -->
+            <div id="guestbook-list-container" class="space-y-4">
+                
+                <!-- Sample Q&A Post 1 -->
+                <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs hover:border-blue-300 transition-all">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full">특허협력</span>
+                            <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-check mr-1"></i>답변완료</span>
+                            <h4 class="font-bold text-dark text-base">스마트 내진 치장벽돌(SCBP) 현장 적용 및 자재 단가 문의</h4>
+                        </div>
+                        <span class="text-xs text-gray-400">작성자: 박현장 소장 · 2026.08.28</span>
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed mb-4">
+                        안녕하세요 대표님, 경기도 화성 소재 중소형 근생 상가건물 치장벽돌 시공에 SCBP 기술을 검토하고자 합니다. 기존 조적 대비 단가 절감 비율과 납기 가능 일정 문의드립니다.
+                    </p>
+                    
+                    <!-- Representative Answer Reply -->
+                    <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-primary text-xs space-y-1.5">
+                        <div class="flex items-center justify-between font-bold text-primary mb-1">
+                            <span><i class="fa-solid fa-user-gear mr-1.5"></i>장안동기술사 (노은오 대표) 답변</span>
+                            <span class="text-[11px] text-gray-400">2026.08.28</span>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">
+                            반갑습니다. SCBP 기술은 기존 대비 인건비 및 부자재 소요가 줄어 합산 50% 수준의 시공비 절감이 가능합니다. 구체적인 수량과 현장 평면도를 보내주시면 견적 및 납기 안내 드리겠습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sample Q&A Post 2 -->
+                <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs hover:border-blue-300 transition-all">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full">시험상담</span>
+                            <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-check mr-1"></i>답변완료</span>
+                            <h4 class="font-bold text-dark text-base">건축시공기술사 2차 면접 준비 및 서브노트 작성 조언</h4>
+                        </div>
+                        <span class="text-xs text-gray-400">작성자: 열공시공인 · 2026.08.25</span>
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed mb-4">
+                        필기시험 합격 후 면접을 준비 중인 수험생입니다. 대표님께서 기술사 합격 당시 면접에서 강조하셨던 대답 태도나 서브노트 가공 팁이 있으신가요?
+                    </p>
+                    
+                    <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-primary text-xs space-y-1.5">
+                        <div class="flex items-center justify-between font-bold text-primary mb-1">
+                            <span><i class="fa-solid fa-user-gear mr-1.5"></i>장안동기술사 (노은오 대표) 답변</span>
+                            <span class="text-[11px] text-gray-400">2026.08.26</span>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">
+                            필기합격을 축하드립니다! 면접은 단순 암기 확인이 아니라 '현장 판단 능력'을 평가합니다. 본인의 현장 경험과 결부하여 자신감 있게 결론부터 서술하는 대답 연습이 가장 핵심입니다. 보물창 자료실의 서술 요약집도 참고해 보세요.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sample Q&A Post 3 -->
+                <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs hover:border-blue-300 transition-all">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full">응원/방명록</span>
+                            <span class="bg-gray-100 text-gray-600 text-[11px] font-bold px-2 py-0.5 rounded">등록글</span>
+                            <h4 class="font-bold text-dark text-base">장안동기술사 종합 플랫폼 개설을 축하드립니다!</h4>
+                        </div>
+                        <span class="text-xs text-gray-400">작성자: 한서대 동문 · 2026.08.20</span>
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        노은오 대표기술사님의 무궁한 발전을 기원합니다. 탈현장화 OSC와 친환경 자원순환 건설을 선도하는 최고의 기술사 플랫폼이 되기를 응원합니다!
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 5: COMPANY ABOUT (회사소개) -->
+        <!-- ========================================== -->
+        <section id="about" class="content-section">
+            <div class="mb-6 flex items-center gap-4 border-b pb-4">
+                <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-dark"><i class="fa-regular fa-building text-primary mr-2"></i>회사소개</h2>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <div class="w-full md:w-1/3">
+                        <div class="bg-slate-50 p-6 rounded-xl border border-gray-200 space-y-4 text-sm">
+                            <h3 class="text-base font-bold text-primary border-b pb-2">기업 기본 정보</h3>
+                            <div>
+                                <span class="text-xs text-gray-500 block mb-0.5">기업명</span>
+                                <span class="font-bold text-dark text-base">장안동기술사</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block mb-0.5">사업자등록번호</span>
+                                <span class="font-medium text-dark">768-06-03099</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block mb-0.5">개업일</span>
+                                <span class="font-medium text-dark">2024년 8월 26일</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block mb-0.5">주요 종목</span>
+                                <span class="font-medium text-dark">건물 및 토목 엔지니어링 서비스업 (기술사)</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block mb-0.5">대표자</span>
+                                <span class="font-bold text-primary">노은오 (건축시공기술사)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:w-2/3">
+                        <h3 class="text-xl font-bold text-dark mb-4">비전 및 사업 목적</h3>
+                        <div class="prose max-w-none text-gray-700 text-sm leading-relaxed bg-blue-50/50 p-6 rounded-xl border border-blue-100 space-y-3">
+                            <p>
+                                공사비 검토, 설계도면 검토, 설계변경, 기술검토, 공법검토, 시공계획, 안전관리계획서 작성 등 <strong class="text-primary font-bold">종합 엔지니어링 서비스 제공</strong>,
+                            </p>
+                            <p>
+                                스마트 내진 치장벽돌(SCBP) 등 친환경 건축자재 및 시공방법 <strong class="text-primary font-bold">특허 개발·상품화·제조·판매</strong>,
+                            </p>
+                            <p>
+                                건축물 해체 및 재사용, 리모델링 사업, 토사 및 골재 재생산, 순환골재 취급, 중고재산 매입과 재생, <strong class="text-secondary font-bold">리사이클센터 설립</strong>.
+                            </p>
+                            <div class="font-medium text-dark border-l-4 border-primary pl-4 pt-2">
+                                "글로벌 유통망 확충을 통한 전 세계적인<br>
+                                <span class="text-primary font-bold text-base">스마트 OSC(Off-Site Construction) 탈현장화 혁신 건설 선두기업 달성</span>을 목적으로 함."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 6: BUSINESS (사업분야) -->
+        <!-- ========================================== -->
+        <section id="business" class="content-section">
+            <div class="mb-6 flex items-center gap-4 border-b pb-4">
+                <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-dark"><i class="fa-solid fa-network-wired text-secondary mr-2"></i>사업분야</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-compass-drafting"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-dark mb-3">엔지니어링 서비스</h3>
+                    <ul class="space-y-2 text-gray-600 text-xs list-disc list-inside leading-relaxed">
+                        <li>공사비 및 설계도면 검토</li>
+                        <li>설계변경 및 기술검토</li>
+                        <li>공법검토 및 시공계획</li>
+                        <li>안전관리계획서 수립 및 국토안전관리원 심사</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-recycle"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-dark mb-3">친환경 및 자원순환</h3>
+                    <ul class="space-y-2 text-gray-600 text-xs list-disc list-inside leading-relaxed">
+                        <li>건축물 해체 및 재사용</li>
+                        <li>토사 및 골재 재생산</li>
+                        <li>순환골재 취급 및 자재 마켓</li>
+                        <li>중고재산 매입과 재생 센터 설립</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-building-circle-arrow-right"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-dark mb-3">스마트 건설 (OSC)</h3>
+                    <ul class="space-y-2 text-gray-600 text-xs list-disc list-inside leading-relaxed">
+                        <li>스마트 내진 치장벽돌(SCBP) 제조</li>
+                        <li>리모델링 및 모듈러 패널화</li>
+                        <li>친환경 건축자재 글로벌 유통</li>
+                        <li class="font-bold text-primary pt-1">OSC 탈현장화 혁신 선도</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 7: PATENT (스마트 특허기술) -->
+        <!-- ========================================== -->
+        <section id="patent" class="content-section">
+            <div class="mb-6 flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2 class="text-2xl font-bold text-dark"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>스마트 특허기술 (SCBP)</h2>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg">
+                <div class="relative z-10 md:w-2/3">
+                    <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">특허 보유기술</span>
+                    <h3 class="text-2xl md:text-3xl font-extrabold mb-4">스마트 내진 치장벽돌 및 모듈러 시공법</h3>
+                    <p class="text-blue-200 text-sm mb-6 leading-relaxed">
+                        기존 적벽돌의 인건비 부담과 지진 시 탈락·붕괴 위험을 획기적으로 개선하였습니다. 8개 1조 유닛 구성 및 단순 걸침 공법을 통해 시공비를 53% 절감하고 구조적 안전성을 극대화합니다.
+                    </p>
+                    <div class="bg-white/10 rounded-xl p-4 border border-white/20 backdrop-blur-sm text-xs space-y-2 mb-6">
+                        <div class="font-bold text-yellow-300"><i class="fa-solid fa-check-double mr-1"></i>핵심 특장점</div>
+                        <div>• 시공인건비 약 66% 절감 및 전체 시공비 53% 절약</div>
+                        <div>• 내진 성능 모듈 설계로 균열 및 박리 방지</div>
+                        <div>• 순환골재 및 친환경 재료 혼합 가능</div>
+                    </div>
+                    <button onclick="showSection('treasure')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg text-xs transition-colors shadow">
+                        <i class="fa-solid fa-download mr-1"></i> 보물창에서 특허 지침서 다운로드
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 8: PLATFORM MARKET (공사판마켓) -->
+        <!-- ========================================== -->
+        <section id="platform" class="content-section">
+            <div class="mb-6 flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2 class="text-2xl font-bold text-dark"><i class="fa-solid fa-store text-purple-600 mr-2"></i>공사판마켓 <span class="text-sm font-normal text-gray-500">(자재/장비 순환)</span></h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200 p-3">
+                    <div class="h-32 bg-gray-100 rounded-lg overflow-hidden mb-2 relative">
+                        <span class="absolute top-2 left-2 bg-green-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">판매중</span>
+                        <img src="https://placehold.co/400x300/e2e8f0/64748b?text=Recycled+Aggregate" alt="순환골재" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-bold text-xs text-dark truncate">순환골재 25톤 덤프 단위</h4>
+                    <p class="text-[11px] text-gray-400">서울/경기지역</p>
+                    <p class="font-bold text-purple-700 text-xs mt-1">단가 협의</p>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200 p-3">
+                    <div class="h-32 bg-gray-100 rounded-lg overflow-hidden mb-2">
+                        <img src="https://placehold.co/400x300/e2e8f0/64748b?text=H-Beam" alt="H빔" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-bold text-xs text-dark truncate">중고 H빔 300x300</h4>
+                    <p class="text-[11px] text-gray-400">충청권</p>
+                    <p class="font-bold text-purple-700 text-xs mt-1">kg당 700원</p>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200 p-3">
+                    <div class="h-32 bg-gray-100 rounded-lg overflow-hidden mb-2">
+                        <img src="https://placehold.co/400x300/e2e8f0/64748b?text=Bricks" alt="치장벽돌" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-bold text-xs text-dark truncate">현장 잉여 적벽돌 5파레트</h4>
+                    <p class="text-[11px] text-gray-400">전국 배송가능</p>
+                    <p class="font-bold text-purple-700 text-xs mt-1">일괄 30만원</p>
+                </div>
+
+                <div onclick="showToast('자재 등록 신청이 준비되었습니다.')" class="bg-purple-50 rounded-xl border-2 border-dashed border-purple-300 p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-purple-100 transition-colors">
+                    <i class="fa-solid fa-plus-circle text-purple-600 text-2xl mb-1"></i>
+                    <span class="font-bold text-xs text-purple-900">내 자재 등록하기</span>
+                    <span class="text-[10px] text-purple-600">잉여자재/중고장비 등록</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 9: COMMUNITY (건축시공기술사) -->
+        <!-- ========================================== -->
+        <section id="community" class="content-section">
+            <div class="mb-6 flex items-center gap-4 border-b pb-4">
+                <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-dark"><i class="fa-solid fa-book-open text-yellow-500 mr-2"></i>건축시공기술사 라운지</h2>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-gray-200 p-6">
+                <p class="text-xs text-gray-600 mb-4">건축시공기술사 합격을 향해 정진하는 기술인들을 위한 공부방 및 토론 게시판입니다.</p>
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-lg flex justify-between items-center cursor-pointer hover:bg-slate-100" onclick="showSection('guestbook')">
+                        <span class="font-bold text-dark">[질문] 기술사 면접 준비시 가장 중요한 포인트가 무엇인가요?</span>
+                        <span class="text-gray-400">노은오 대표 답변완료</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg flex justify-between items-center cursor-pointer hover:bg-slate-100" onclick="showSection('treasure')">
+                        <span class="font-bold text-dark">[공유] 132회 건축시공기술사 서술형 핵심 암기 요약집 (보물창)</span>
+                        <span class="text-indigo-600 font-bold">보물창 가기</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 10: FIELD (현장활동) -->
+        <!-- ========================================== -->
+        <section id="field" class="content-section">
+            <div class="mb-6 flex items-center gap-4 border-b pb-4">
+                <button onclick="showSection('dashboard')" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600 shadow-sm transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-dark"><i class="fa-solid fa-camera text-orange-500 mr-2"></i>현장활동 갤러리</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
+                    <div class="h-44 bg-gray-200 relative">
+                        <img src="https://placehold.co/600x400/e2e8f0/64748b?text=Safety+Inspection" alt="안전점검" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <span class="text-[11px] text-gray-400 font-medium">2026. 07. 15</span>
+                        <h4 class="font-bold text-sm text-dark">공공 중부 섹션 현장 안전 및 시공점검</h4>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
+                    <div class="h-44 bg-gray-200 relative">
+                        <img src="https://placehold.co/600x400/e2e8f0/64748b?text=Demolition+Site" alt="해체현장" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <span class="text-[11px] text-gray-400 font-medium">2026. 08. 02</span>
+                        <h4 class="font-bold text-sm text-dark">노후 건축물 해체 및 자원 재활용 계획 검토</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closeContactModal()" class="absolute top-4 right-4 text-gray-400 hover:text-dark text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-extrabold text-dark mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-paper-plane text-primary"></i> 엔지니어링 및 기술 문의
+            </h3>
+            <div class="space-y-3 text-xs text-gray-600 mb-6 bg-slate-50 p-4 rounded-xl border border-gray-200">
+                <div><strong class="text-dark">대표자:</strong> 노은오 (건축시공기술사)</div>
+                <div><strong class="text-dark">주소:</strong> 서울특별시 동대문구 천호대로97길 61, 201동 1302호</div>
+                <div><strong class="text-dark">주요업무:</strong> 공사비 검토, 안전관리계획서, 설계변경, 특허(SCBP) 문의</div>
+            </div>
+            <form onsubmit="handleDirectContactSubmit(event)" class="space-y-3">
+                <input type="text" required placeholder="성함 / 업체명" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-primary focus:outline-none">
+                <input type="tel" required placeholder="연락처 (휴대전화)" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-primary focus:outline-none">
+                <textarea rows="3" required placeholder="문의 내용 (상세 내용 적어주시면 신속히 연락드립니다)" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-primary focus:outline-none"></textarea>
+                <button type="submit" class="w-full py-2.5 bg-primary hover:bg-primaryDark text-white font-bold rounded-lg text-xs transition-colors shadow">
+                    전송하기
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resource Detail Modal -->
+    <div id="resource-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeResourceModal()" class="absolute top-4 right-4 text-gray-400 hover:text-dark text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl mx-auto mb-2">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+                <h3 id="res-modal-title" class="text-lg font-bold text-dark">자료 미리보기</h3>
+            </div>
+            <p id="res-modal-desc" class="text-xs text-gray-600 bg-slate-50 p-4 rounded-xl border border-gray-200 leading-relaxed mb-6">
+                설명 내용이 들어갑니다.
+            </p>
+            <button onclick="downloadFileSimulator('장안동기술사_보물창_첨부자료.pdf'); closeResourceModal();" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition-colors shadow flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i> 자료 다운로드 시작
+            </button>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-gray-400 py-10 mt-auto border-t border-gray-800">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6 border-b border-gray-800 pb-8 mb-6">
+                <div>
+                    <div class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-building-shield text-primary"></i>
+                        장안동기술사
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        종합 엔지니어링부터 스마트 특허기술, 자재 마켓, 보물창 자료실까지.<br>건설 기술의 가치를 정립하는 플랫폼입니다.
+                    </p>
+                </div>
+                
+                <div class="text-xs text-center md:text-right space-y-1">
+                    <p><span class="text-gray-500">대표자 :</span> 노은오 (건축시공기술사)</p>
+                    <p><span class="text-gray-500">사업자등록번호 :</span> 768-06-03099</p>
+                    <p><span class="text-gray-500">개업일 :</span> 2024년 8월 26일</p>
+                    <p><span class="text-gray-500">주요 종목 :</span> 건물 및 토목 엔지니어링 서비스업(기술사)</p>
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-600">
+                &copy; 2024-2026 장안동기술사 건설 플랫폼. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            msgEl.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function filterArchiveCategory(category) {
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-xs');
+                btn.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
+            });
+
+            event.currentTarget.classList.remove('bg-white', 'text-gray-600', 'border', 'border-gray-200');
+            event.currentTarget.classList.add('bg-indigo-600', 'text-white', 'shadow-xs');
+
+            const items = document.querySelectorAll('.archive-card');
+            items.forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function filterArchive() {
+            const query = document.getElementById('archive-search').value.toLowerCase();
+            const items = document.querySelectorAll('.archive-card');
+            items.forEach(item => {
+                const title = item.getAttribute('data-title').toLowerCase();
+                if (title.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function openResourceModal(title, desc) {
+            document.getElementById('res-modal-title').textContent = title;
+            document.getElementById('res-modal-desc').textContent = desc;
+            document.getElementById('resource-modal').classList.remove('hidden');
+        }
+
+        function closeResourceModal() {
+            document.getElementById('resource-modal').classList.add('hidden');
+        }
+
+        function downloadFileSimulator(filename) {
+            showToast(`'${filename}' 다운로드가 시작되었습니다.`);
+        }
+
+        function toggleGuestbookForm() {
+            const box = document.getElementById('guestbook-form-box');
+            box.classList.toggle('hidden');
+        }
+
+        function handleGuestbookSubmit(e) {
+            e.preventDefault();
+            const author = document.getElementById('gb-author').value;
+            const category = document.getElementById('gb-category').value;
+            const title = document.getElementById('gb-title').value;
+            const content = document.getElementById('gb-content').value;
+
+            const container = document.getElementById('guestbook-list-container');
+            const newPost = document.createElement('div');
+            newPost.className = "bg-white rounded-2xl p-5 border border-blue-300 shadow-xs animate-fadeIn";
+            newPost.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 border-b pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full">${category}</span>
+                        <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-clock mr-1"></i>답변대기</span>
+                        <h4 class="font-bold text-dark text-base">${escapeHtml(title)}</h4>
+                    </div>
+                    <span class="text-xs text-gray-400">작성자: ${escapeHtml(author)} · 방금 전</span>
+                </div>
+                <p class="text-xs text-gray-600 leading-relaxed">${escapeHtml(content)}</p>
+            `;
+
+            container.prepend(newPost);
+            
+            // Reset form
+            document.getElementById('gb-author').value = '';
+            document.getElementById('gb-title').value = '';
+            document.getElementById('gb-content').value = '';
+            toggleGuestbookForm();
+
+            showToast("문의글이 성공적으로 등록되었습니다!");
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        function openContactModal() {
+            document.getElementById('contact-modal').classList.remove('hidden');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contact-modal').classList.add('hidden');
+        }
+
+        function handleDirectContactSubmit(e) {
+            e.preventDefault();
+            closeContactModal();
+            showToast("대표 기술사에게 문의가 전달되었습니다. 곧 연락드리겠습니다.");
+        }
+    </script>
+</body>
+</html>
